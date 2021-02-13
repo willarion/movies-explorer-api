@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return emailValidator.isURL(v);
+        return urlValidator.isURL(v);
       },
       message: 'Ссылка на картинку не соответствует формату :( Попробуйте ещё раз',
     },
@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return emailValidator.isURL(v);
+        return urlValidator.isURL(v);
       },
       message: 'Ссылка на трейлер не соответствует формату :( Попробуйте ещё раз',
     },
@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return emailValidator.isURL(v);
+        return urlValidator.isURL(v);
       },
       message: 'Ссылка на картинку не соответствует формату :( Попробуйте ещё раз',
     },
@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
+    required: true,
+  },
+  movieId: {
+    type: Number,
     required: true,
   },
   nameRU: {
