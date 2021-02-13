@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 const {
   NotFoundError,
@@ -9,18 +10,15 @@ const {
   DataConflictError,
 } = require('../errors/errors');
 
-
 function getUserProfile(req, res, next) {
   User.findById(req.user._id)
     .orFail(() => {
       throw new NotFoundError('Пользователя с таким id не существует');
     })
-    .then((user) =>
-      res.send({
-        email: user.email,
-        name: user.name
-      })
-    )
+    .then((user) => res.send({
+      email: user.email,
+      name: user.name,
+    }))
     .catch((err) => {
       if (err.kind === 'ObjectId') {
         throw new InvalidRequestError('Невалидный id пользователя');
@@ -58,7 +56,7 @@ function updateUserProfile(req, res, next) {
 
 function createUser(req, res, next) {
   const {
-    email, password, name
+    email, password, name,
   } = req.body;
 
   User.findOne({ email })
@@ -70,14 +68,12 @@ function createUser(req, res, next) {
           .then((hash) => User.create({
             email,
             password: hash,
-            name
+            name,
           }))
-          .then((user) =>
-            res.send({
-              email: user.email,
-              name: user.name
-            })
-          )
+          .then((newUser) => res.send({
+            email: newUser.email,
+            name: newUser.name,
+          }))
           .catch((err) => {
             if (err.name === 'ValidationError') {
               throw new InvalidRequestError('Введённые данные невалидны');
@@ -104,7 +100,6 @@ function login(req, res, next) {
     })
     .catch((err) => next(err));
 }
-
 
 module.exports = {
   getUserProfile,

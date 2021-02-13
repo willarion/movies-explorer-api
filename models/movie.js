@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const urlValidator = require('validator');
 
-
 const userSchema = new mongoose.Schema({
   country: {
     type: String,
@@ -71,6 +70,5 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 });
-
 
 module.exports = mongoose.model('movie', userSchema);

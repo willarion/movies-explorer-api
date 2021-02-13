@@ -2,8 +2,8 @@ const Movie = require('../models/movie');
 const {
   NotFoundError,
   InvalidRequestError,
+  ForbiddenError,
 } = require('../errors/errors');
-
 
 function getMovies(req, res, next) {
   Movie.find({})
@@ -17,11 +17,33 @@ function getMovies(req, res, next) {
 }
 
 function createMovie(req, res, next) {
-  const { country, director, duration, year, description, image, trailer, thumbnail, movieId, nameRU, nameEN } = req.body;
+  const {
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailer,
+    thumbnail,
+    movieId,
+    nameRU,
+    nameEN,
+  } = req.body;
 
   Movie.create({
-    country, director, duration, year, description, image, trailer, thumbnail, movieId, nameRU, nameEN,
-    owner: req.user._id
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailer,
+    thumbnail,
+    movieId,
+    nameRU,
+    nameEN,
+    owner: req.user._id,
   })
     .then((movie) => res.send(movie))
     .catch((err) => {
@@ -43,18 +65,15 @@ function deleteMovie(req, res, next) {
     .orFail(() => {
       throw new NotFoundError('Фильма с таким id не существует');
     })
-    .then(() => {
+    .then((card) => {
       if ((card.owner).toString() !== userId) {
         throw new ForbiddenError('Нельзя удалять карточки других пользователей');
-      }
-      else {
+      } else {
         Movie.findByIdAndRemove(movieId)
-          .then((movie) =>
-            res.send({
-              data: movie,
-              message: 'фильм удалён'
-            })
-          )
+          .then((movie) => res.send({
+            data: movie,
+            message: 'фильм удалён',
+          }))
           .catch((err) => next(err));
       }
     })
@@ -67,9 +86,8 @@ function deleteMovie(req, res, next) {
     .catch((err) => next(err));
 }
 
-
 module.exports = {
   getMovies,
   createMovie,
-  deleteMovie
+  deleteMovie,
 };
