@@ -4,6 +4,7 @@ const {
   InvalidRequestError,
   ForbiddenError,
 } = require('../errors/errors');
+const errorMessages = require('../utils/constants');
 
 function getMovies(req, res, next) {
   Movie.find({})
@@ -50,7 +51,7 @@ function createMovie(req, res, next) {
       console.log(err);
 
       if (err.name === 'ValidationError') {
-        throw new InvalidRequestError('Введённые данные невалидны');
+        throw new InvalidRequestError(errorMessages.invalidId);
       }
       throw err;
     })
@@ -63,23 +64,23 @@ function deleteMovie(req, res, next) {
 
   Movie.findOne({ _id: movieId })
     .orFail(() => {
-      throw new NotFoundError('Фильма с таким id не существует');
+      throw new NotFoundError(errorMessages.noMovie);
     })
     .then((card) => {
       if ((card.owner).toString() !== userId) {
-        throw new ForbiddenError('Нельзя удалять карточки других пользователей');
+        throw new ForbiddenError(errorMessages.othersData);
       } else {
         Movie.findByIdAndRemove(movieId)
           .then((movie) => res.send({
             data: movie,
-            message: 'фильм удалён',
+            message: errorMessages.movieDeleted,
           }))
           .catch((err) => next(err));
       }
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        throw new InvalidRequestError('Невалидный id фильма');
+        throw new InvalidRequestError(errorMessages.invalidId);
       }
       next(err);
     })

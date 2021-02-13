@@ -1,19 +1,20 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
-const { NODE_ENV, JWT_SECRET } = process.env;
 const {
   NotFoundError,
   UnathorizedError,
   InvalidRequestError,
   DataConflictError,
 } = require('../errors/errors');
+const errorMessages = require('../utils/constants');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 function getUserProfile(req, res, next) {
   User.findById(req.user._id)
     .orFail(() => {
-      throw new NotFoundError('Пользователя с таким id не существует');
+      throw new NotFoundError(errorMessages.noUser);
     })
     .then((user) => res.send({
       email: user.email,
@@ -21,7 +22,7 @@ function getUserProfile(req, res, next) {
     }))
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        throw new InvalidRequestError('Невалидный id пользователя');
+        throw new InvalidRequestError(errorMessages.invalidId);
       }
       next(err);
     })
@@ -39,15 +40,15 @@ function updateUserProfile(req, res, next) {
       upsert: true,
     })
     .orFail(() => {
-      throw new NotFoundError('Пользователя с таким id не существует');
+      throw new NotFoundError(errorMessages.noUser);
     })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new InvalidRequestError('Введённые данные невалидны');
+        throw new InvalidRequestError(errorMessages.invalidData);
       }
       if (err.kind === 'ObjectId') {
-        throw new InvalidRequestError('Невалидный id пользователя');
+        throw new InvalidRequestError(errorMessages.invalidId);
       }
       next(err);
     })
@@ -62,7 +63,7 @@ function createUser(req, res, next) {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new DataConflictError('Пользователь уже зарегистрирован');
+        throw new DataConflictError(errorMessages.userExists);
       } else {
         bcrypt.hash(password, 10)
           .then((hash) => User.create({
@@ -76,7 +77,7 @@ function createUser(req, res, next) {
           }))
           .catch((err) => {
             if (err.name === 'ValidationError') {
-              throw new InvalidRequestError('Введённые данные невалидны');
+              throw new InvalidRequestError(errorMessages.invalidData);
             }
             next(err);
           })
@@ -96,7 +97,7 @@ function login(req, res, next) {
       res.send({ token });
     })
     .catch(() => {
-      throw new UnathorizedError('Необходима авторизация');
+      throw new UnathorizedError(errorMessages.authNeeded);
     })
     .catch((err) => next(err));
 }

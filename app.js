@@ -1,20 +1,23 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
+const helmet = require('helmet');
 const mongoose = require('mongoose');
 require('dotenv').config(); // load process.env variables
 const { errors, celebrate, Joi } = require('celebrate');
-const bodyParser = require('body-parser');
+const limiter = require('./middlewares/limiter');
+const mainRouter = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
 const { NotFoundError } = require('./errors/errors');
 const auth = require('./middlewares/auth');
-const usersRouter = require('./routes/users');
-const moviesRouter = require('./routes/movies');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const errorMessages = require('./utils/constants');
 
+const { NODE_ENV, MONGODB } = process.env;
 const app = express();
 const PORT = 3000;
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(NODE_ENV === 'production' ? MONGODB : 'mongodb://localhost:27017/bitfilmsdb', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -24,9 +27,14 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.set('trust proxy', 1); // for nginx
+app.use(limiter);
+
 app.use(cors());
 
 app.use(requestLogger);
+
+app.use(helmet());
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -45,11 +53,10 @@ app.post('/signup', celebrate({
 
 app.use(auth);
 
-app.use('/', usersRouter);
-app.use('/', moviesRouter);
+app.use('/', mainRouter);
 
 app.use('*', (req, res, next) => {
-  next(new NotFoundError('Такой страницы не существует'));
+  next(new NotFoundError(errorMessages.noPage));
 });
 
 app.use(errorLogger);
@@ -62,7 +69,7 @@ app.use((err, req, res, next) => {
     .status(statusCode)
     .send({
       message: statusCode === 500
-        ? 'На сервере произошла ошибка'
+        ? errorMessages.serverError
         : message,
     });
 });
