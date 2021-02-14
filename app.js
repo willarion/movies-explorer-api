@@ -65,13 +65,14 @@ app.use(errors()); // celebrate errors
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
-  return res
+  res
     .status(statusCode)
     .send({
       message: statusCode === 500
         ? errorMessages.serverError
         : message,
     });
+  next();
 });
 
 app.listen(PORT, () => {
