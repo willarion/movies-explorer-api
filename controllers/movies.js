@@ -7,7 +7,7 @@ const {
 const errorMessages = require('../utils/constants');
 
 function getMovies(req, res, next) {
-  Movie.find({})
+  Movie.find({ owner: req.user._id })
     .then((movies) => {
       if (!movies) {
         throw new Error();
@@ -48,8 +48,6 @@ function createMovie(req, res, next) {
   })
     .then((movie) => res.send(movie))
     .catch((err) => {
-      console.log(err);
-
       if (err.name === 'ValidationError') {
         throw new InvalidRequestError(errorMessages.invalidId);
       }
@@ -70,7 +68,8 @@ function deleteMovie(req, res, next) {
       if ((card.owner).toString() !== userId) {
         throw new ForbiddenError(errorMessages.othersData);
       } else {
-        Movie.findByIdAndRemove(movieId)
+        //  Movie.findByIdAndRemove(movieId)
+        card.remove()
           .then((movie) => res.send({
             data: movie,
             message: errorMessages.movieDeleted,

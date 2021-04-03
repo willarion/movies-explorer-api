@@ -61,14 +61,14 @@ router.post('/movies', celebrate({
         'number.base': `Id ${errorMessages.dataFormat}`,
         'any.required': errorMessages.requiredField,
       }),
-    nameRU: Joi.string().required().regex(/^[а-яё0-9]+[а-я0-9\s.?!,:;\-=+&'()*]*/i)
+    nameRU: Joi.string().required()
       .messages({
         'string.base': `Название ${errorMessages.dataFormat}`,
         'string.empty': errorMessages.requiredField,
         'any.required': errorMessages.requiredField,
         'string.pattern.base': `Название ${errorMessages.dataFormat}`,
       }),
-    nameEN: Joi.string().required().regex(/^[a-z0-9]+[a-z0-9\s.?!,:;\-=+&'()*]*/i)
+    nameEN: Joi.string().required()
       .messages({
         'string.base': `Название ${errorMessages.dataFormat}`,
         'string.empty': errorMessages.requiredField,
@@ -79,7 +79,7 @@ router.post('/movies', celebrate({
 }), createMovie);
 router.delete('/movies/:movieId', celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().alphanum().length(24)
+    movieId: Joi.string().hex().length(24)
       .messages({
         'string.alphanum': `Id ${errorMessages.dataFormat}`,
         'string.length': `Id ${errorMessages.dataFormat}`,

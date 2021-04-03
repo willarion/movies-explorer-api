@@ -28,11 +28,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set('trust proxy', 1); // for nginx
+app.use(requestLogger);
 app.use(limiter);
 
 app.use(cors());
-
-app.use(requestLogger);
 
 app.use(helmet());
 
@@ -47,7 +46,7 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
   }),
 }), createUser);
 

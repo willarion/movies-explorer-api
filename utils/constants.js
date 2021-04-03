@@ -9,9 +9,10 @@ const requiredField = 'Поле обязательно';
 const min = 'Минимальное количество символов должно быть';
 const max = 'Максимальное количество символов должно быть';
 const userExists = 'Пользователь уже зарегистрирован';
-const authNeeded = 'Необходима авторизация';
+const authNeeded = 'Неправильная почта или пароль';
 const othersData = 'Нельзя удалять карточки других пользователей';
 const serverError = 'На сервере произошла ошибка';
+const noAccess = 'Нет доступа';
 
 // messages
 const movieDeleted = 'фильм удалён';
@@ -31,4 +32,5 @@ module.exports = {
   max,
   dataFormat,
   requiredField,
+  noAccess,
 };
